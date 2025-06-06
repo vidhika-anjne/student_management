@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:student_app/admin/add_student_screen.dart';
 import 'package:student_app/admin/list_student_screen.dart';
+import 'package:student_app/admin/approve_event_screen.dart';
+import 'package:student_app/admin/teacher_list_screen.dart';
+import 'package:student_app/admin/add_teacher_screen.dart';
+import 'package:student_app/admin/add_subject_screen.dart';
+import 'package:student_app/admin/list_subjects_screen.dart';
+import 'package:student_app/admin/teacher_assignment_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   final String token;
@@ -11,177 +18,315 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  int _selectedIndex = 0;
+  final Color _primaryColor = const Color(0xFF4361EE);
+  final Color _secondaryColor = const Color(0xFF3F37C9);
 
-  final List<String> _menuTitles = [
-    'Dashboard',
-    'Add Student',
-    'Student List',
-    'Bulk Upload',
-    'Unassigned Students',
-    'Add Teacher',
-    'Teachers List',
-    'Assign Teacher',
-    'Add Class',
-    'Classes List',
-    'Add Club Head',
-    'Add Admin',
-    'Add Subject',
-    'Subjects List',
-    'Logout',
-  ];
+  final List<Map<String, dynamic>> _quickActions = [
+    // {
+    //   'title': 'Add Student',
+    //   'icon': Icons.person_add_alt_1,
+    //   'color': Color(0xFF4CC9F0),
+    //   'action': (BuildContext context, String token) => Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (_) => AddStudentScreen(token: token)),
+    //   )
+    // },
+    // {
+    //   'title': 'View Students',
+    //   'icon': Icons.list,
+    //   'color': Color(0xFF4895EF),
+    //   'action': (BuildContext context, String token) => Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (_) => ListStudentsScreen(token: token)),
+    //   )
+    // },
+    {
+      'title': 'Approve Event',
+      'icon': Icons.event_available,
+      'color': Color(0xFF7209B7),
+      'action': (BuildContext context, String token) => Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ApproveEventScreen(token: token)),
+      )
+    },
+    {
+      'title': 'Class Report',
+      'icon': Icons.assignment,
+      'color': Color(0xFFF72585),
+      'action': (_, __) {},
+    },
+    {
+      'title': 'Student Report',
+      'icon': Icons.assignment_ind,
+      'color': Color(0xFF4895EF),
+      'action': (_, __) {},
+    },
+    {
+      'title': 'Attendance Analytics',
+      'icon': Icons.analytics,
+      'color': Color(0xFF3A0CA3),
+      'action': (_, __) {},
+    },
+    {
+      'title': 'Bulk Upload',
+      'icon': Icons.cloud_upload,
+      'color': Color(0xFF560BAD),
+      'action': (_, __) {},
+    },
+    {
+      'title': 'Assign Teacher',
+      'icon': Icons.cloud_upload,
+      'color': Color(0xFF560BAD),
+      'action': (BuildContext context, _) {
+        // For example, navigate to the TeacherAssignmentPage:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AssignTeacherPage()),
+        );
+      },
+    }
 
-  final List<IconData> _menuIcons = [
-    Icons.dashboard,
-    Icons.person_add,
-    Icons.format_list_bulleted,
-    Icons.upload_file,
-    Icons.group_remove,
-    Icons.school,
-    Icons.groups,
-    Icons.person_pin_circle,
-    Icons.class_,
-    Icons.format_list_numbered,
-    Icons.emoji_people,
-    Icons.admin_panel_settings,
-    Icons.book,
-    Icons.menu_book,
-    Icons.logout,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome, Admin!'),
-        backgroundColor: Colors.blueAccent,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+        title: Text('Admin Dashboard',
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600, color: Colors.white)),
+        backgroundColor: _primaryColor,
+        elevation: 10,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
         ),
       ),
-      drawer: Drawer(
-        child: ListView.builder(
-          itemCount: _menuTitles.length,
-          itemBuilder: (context, index) => ListTile(
-            leading: Icon(_menuIcons[index], color: Colors.blueAccent),
-            title: Text(_menuTitles[index]),
-            onTap: () {
-              setState(() {
-                _selectedIndex = index;
-              });
-              Navigator.pop(context);
-              // Add navigation logic for each menu item here
-              switch (index) {
-                case 1:
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddStudentScreen(token: widget.token),
-                    ),
-                  );
-                  break;
-                case 2:
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ListStudentsScreen(token: widget.token),
-                    ),
-                  );
-                  break;
-              }
-            },
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      drawer: _buildDrawer(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Dashboard Metrics
-            const Text(
-              'Dashboard Overview',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildDashboardCard('Total Students', '120', Icons.person),
-                _buildDashboardCard('Active Teachers', '15', Icons.school),
-                _buildDashboardCard('Classes', '10', Icons.class_),
-              ],
-            ),
-            const SizedBox(height: 32),
-            // Quick Access Buttons
-            const Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _buildQuickActionButton('Add Student', Icons.person_add, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddStudentScreen(token: widget.token),
-                    ),
-                  );
-                }),
-                _buildQuickActionButton('Bulk Upload', Icons.upload_file, () {
-                  // Add bulk upload navigation logic
-                }),
-              ],
-            ),
+            Text('Overview Metrics',
+                style: GoogleFonts.poppins(
+                    fontSize: 20, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 15),
+            _buildMetricsRow(),
+            const SizedBox(height: 30),
+            Text('Quick Actions',
+                style: GoogleFonts.poppins(
+                    fontSize: 20, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 15),
+            _buildQuickActionsGrid(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDashboardCard(String title, String count, IconData icon) {
-    return Expanded(
-      child: Card(
-        color: Colors.blueAccent.withOpacity(0.1),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 40, color: Colors.blueAccent),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_primaryColor, _secondaryColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              Text(
-                count,
-                style: const TextStyle(fontSize: 24, color: Colors.blueAccent),
-              ),
-            ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 30,
+                  child: Icon(Icons.school, size: 40, color: _primaryColor),
+                ),
+                const SizedBox(height: 10),
+                Text('Admin Panel',
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600)),
+              ],
+            ),
           ),
+          ListTile(
+            leading: Icon(Icons.dashboard, color: _primaryColor),
+            title: Text('Dashboard', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add, color: _primaryColor),
+            title:
+            Text('Add Student', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AddStudentScreen(token: widget.token))),
+          ),
+          ListTile(
+            leading: Icon(Icons.list, color: _primaryColor),
+            title:
+            Text('View Students', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => ListStudentsScreen(token: widget.token))),
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add, color: _primaryColor),
+            title:
+            Text('Add Teachers', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AddTeacherPage(token: widget.token))),
+          ),
+          ListTile(
+            leading: Icon(Icons.list, color: _primaryColor),
+            title:
+            Text('View Teachers', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => TeacherListPage(token: widget.token))),
+          ),
+
+          ListTile(
+            leading: Icon(Icons.add, color: _primaryColor),
+            title:
+            Text('Add Subjects', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AddSubjectPage(token: widget.token))),
+          ),
+
+          ListTile(
+            leading: Icon(Icons.list, color: _primaryColor),
+            title:
+            Text('View Subjects', style: GoogleFonts.poppins(fontSize: 14)),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => ViewSubjectsPage(token: widget.token))),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: Text('Logout',
+                style:
+                GoogleFonts.poppins(color: Colors.red, fontSize: 14)),
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricsRow() {
+    return Row(
+      children: [
+        _buildMetricCard('Students', '72', Icons.people_alt, 0xFF4CC9F0),
+        const SizedBox(width: 15),
+        _buildMetricCard('Teachers', '10', Icons.school, 0xFF7209B7),
+        const SizedBox(width: 15),
+        _buildMetricCard('Classes', '9', Icons.class_, 0xFFF72585),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard(
+      String title, String value, IconData icon, int color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Color(color).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(color).withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 30, color: Color(color)),
+            ),
+            const SizedBox(height: 10),
+            Text(value,
+                style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: Color(color))),
+            Text(title,
+                style: GoogleFonts.poppins(
+                    fontSize: 14, color: Colors.grey.shade600)),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickActionButton(String title, IconData icon, VoidCallback onTap) {
-    return ElevatedButton.icon(
-      icon: Icon(icon, size: 24),
-      label: Text(title),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-      ),
-      onPressed: onTap,
+  Widget _buildQuickActionsGrid() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 15,
+      crossAxisSpacing: 15,
+      childAspectRatio: 1.2,
+      children: _quickActions
+          .map((action) => Material(
+        color: action['color'].withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: () => action['action'](context, widget.token),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: action['color'].withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(action['icon'],
+                      size: 30, color: action['color']),
+                ),
+                const SizedBox(height: 15),
+                Text(action['title'],
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87)),
+              ],
+            ),
+          ),
+        ),
+      ))
+          .toList(),
     );
   }
 }
